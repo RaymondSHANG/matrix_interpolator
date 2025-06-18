@@ -132,26 +132,52 @@ def main():
         required=True,
         help="Path to the input CSV file containing the matrix."
     )
+    # The --output flag. If present, it expects a value (default nargs=1).
     parser.add_argument(
         "--output",
         type=str,
-        required=True,
-        help="Path to the output CSV file for the interpolated matrix."
+        help="Path to the output CSV file for the interpolated matrix. "
+             "If provided, this overrides any positional output filename."
+    )
+
+    # Optional positional argument for the output filename.
+    # This will capture any argument that isn't a flag or a flag's value.
+    parser.add_argument(
+        "output_file",
+        nargs='?', # Allows 0 or 1 positional argument
+        help="Optional positional argument for the output CSV file name. "
+             "If provided, and --output flag is not used, this will be the output."
     )
 
     args = parser.parse_args()
 
+    input_file_path = args.input
+    output_file_path = None
+
+    # Determine the output file path based on precedence:
+    # 1. Explicit --output flag
+    # 2. Positional argument (output_file)
+    # 3. Derived from input file name
+    if args.output: # Check if --output flag was provided with a value
+        output_file_path = args.output
+    elif args.output_file: # Check if a positional argument was given
+        output_file_path = args.output_file
+    else:
+        # Construct the derived output filename using the chosen input_file_path
+        base_name = os.path.splitext(input_file_path)[0]
+        output_file_path = f"{base_name}_interpolated.csv"
+
     try:
-        print(f"Reading matrix from: {args.input}")
-        input_matrix = read_matrix(args.input)
+        print(f"Reading matrix from: {input_file_path}")
+        input_matrix = read_matrix(input_file_path)
         print("Input matrix read successfully.")
 
         print("Interpolating missing values...")
         interpolated_matrix = interpolate_matrix(input_matrix)
         print("Interpolation complete.")
 
-        print(f"Writing interpolated matrix to: {args.output}")
-        write_matrix(interpolated_matrix, args.output)
+        print(f"Writing interpolated matrix to: {output_file_path}")
+        write_matrix(interpolated_matrix, output_file_path)
         print("Output matrix written successfully.")
 
     except (FileNotFoundError, ValueError, IOError) as e:
