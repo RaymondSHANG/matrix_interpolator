@@ -113,6 +113,53 @@ def write_matrix(matrix: np.ndarray, file_path: str):
         # Convert NumPy array back to DataFrame for easy CSV writing
         df = pd.DataFrame(matrix)
         # Write to CSV without header and index, and with desired float format
-        df.to_csv(file_path, header=False, index=False, float_format='%.1f')
+        # Values that are non-missing in the input should be preserved in the output without change.
+        df.to_csv(file_path, header=False, index=False)
     except Exception as e:
         raise IOError(f"Error writing matrix to CSV file {file_path}: {e}")
+
+
+def main():
+    """
+    Main function to parse arguments and run the interpolation process.
+    """
+    parser = argparse.ArgumentParser(
+        description="Interpolate missing values in a CSV matrix."
+    )
+    parser.add_argument(
+        "--input",
+        type=str,
+        required=True,
+        help="Path to the input CSV file containing the matrix."
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        required=True,
+        help="Path to the output CSV file for the interpolated matrix."
+    )
+
+    args = parser.parse_args()
+
+    try:
+        print(f"Reading matrix from: {args.input}")
+        input_matrix = read_matrix(args.input)
+        print("Input matrix read successfully.")
+
+        print("Interpolating missing values...")
+        interpolated_matrix = interpolate_matrix(input_matrix)
+        print("Interpolation complete.")
+
+        print(f"Writing interpolated matrix to: {args.output}")
+        write_matrix(interpolated_matrix, args.output)
+        print("Output matrix written successfully.")
+
+    except (FileNotFoundError, ValueError, IOError) as e:
+        print(f"Error: {e}")
+        exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        exit(1)
+
+if __name__ == "__main__":
+    main()
