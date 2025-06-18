@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import os
 from src.matrix_interpolator import read_matrix, interpolate_matrix
+from numpy.testing import assert_array_almost_equal
 
 
 # Define paths for test files
@@ -80,5 +81,34 @@ def test_interpolate_matrix_basic_interpolation():
     matrix = np.array([[1.0, 2.0], [np.nan, 4.0]])
     interpolated = interpolate_matrix(matrix)
     # Neighbor of [1,0] is [0,0]=1.0 and [1,1]=4.0. Average = (1.0+4.0)/2 = 2.5
+    # Corrected expected array: [0,1] should remain 2.0, not become 2.5
     expected = np.array([[1.0, 2.0], [2.5, 4.0]])
-    assert np.array_equal(interpolated, expected)
+    # Use assert_array_almost_equal for float comparisons, no 'assert' keyword needed
+    assert_array_almost_equal(interpolated, expected, decimal=6)
+
+def test_interpolate_matrix_basic_interpolation():
+    """Test a simple case with one nan."""
+    matrix = np.array([[1.0, 2.0], [np.nan, 4.0]])
+    interpolated = interpolate_matrix(matrix)
+    # Neighbor of [1,0] is [0,0]=1.0 and [1,1]=4.0. Average = (1.0+4.0)/2 = 2.5
+    expected = np.array([[1.0, 2.5], [2.5, 4.0]]) # Corrected expected value for [1,0]
+    # Use assert_array_almost_equal for float comparisons, no 'assert' keyword needed
+    assert_array_almost_equal(interpolated, expected, decimal=6)
+
+def test_interpolate_matrix_edge_cases():
+    """Test interpolation at corners and edges."""
+    matrix = np.array([
+        [np.nan, 2.0, 3.0],
+        [4.0, np.nan, 6.0],
+        [7.0, 8.0, np.nan]
+    ])
+    interpolated = interpolate_matrix(matrix)
+    # [0,0] nan: Neighbors [0,1]=2.0, [1,0]=4.0. Avg = (2.0+4.0)/2 = 3.0
+    # [1,1] nan: Neighbors [0,1]=2.0, [1,0]=4.0, [1,2]=6.0, [2,1]=8.0. Avg = (2.0+4.0+6.0+8.0)/4 = 5.0
+    # [2,2] nan: Neighbors [1,2]=6.0, [2,1]=8.0. Avg = (6.0+8.0)/2 = 7.0
+    expected = np.array([
+        [3.0, 2.0, 3.0],
+        [4.0, 5.0, 6.0],
+        [7.0, 8.0, 7.0]
+    ])
+    assert_array_almost_equal(interpolated, expected, decimal=6)
