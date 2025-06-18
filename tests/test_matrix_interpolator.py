@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import pandas as pd
 import os
-from src.matrix_interpolator import read_matrix, interpolate_matrix
+from src.matrix_interpolator import read_matrix, interpolate_matrix, write_matrix
 from numpy.testing import assert_array_almost_equal
 
 
@@ -161,3 +161,15 @@ def test_write_matrix_valid_output():
     with open(TEST_OUTPUT_CSV, 'r') as f:
         actual_content = f.read()
     assert actual_content == expected_content
+
+def test_write_matrix_io_error():
+    """Test writing to a protected or invalid path."""
+    matrix = np.array([[1.0, 2.0]])
+    # Simulate a permission error by trying to write to a directory name
+    if os.path.exists("temp_dir_for_test"):
+        os.rmdir("temp_dir_for_test")
+    os.mkdir("temp_dir_for_test")
+    invalid_path = os.path.join("temp_dir_for_test", "sub_dir", "file.csv") # Invalid path structure
+    with pytest.raises(IOError, match="Error writing matrix to CSV file"):
+        write_matrix(matrix, invalid_path)
+    os.rmdir("temp_dir_for_test") # Clean up the created directory
