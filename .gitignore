@@ -1,3 +1,23 @@
 .DS_Store
 src/.DS_Store
 ~*
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+*.egg-info/
+.hypothesis/
+
+# Conda environments (if not managed directly by conda-git)
+.conda/
+
+# Jupyter Notebook and Lab
+.ipynb_checkpoints/
+
