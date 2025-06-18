@@ -100,3 +100,19 @@ def interpolate_matrix(matrix: np.ndarray) -> np.ndarray:
                     # If no valid non-diagonal neighbors, use the global mean
                     interpolated_matrix[r, c] = global_mean
     return interpolated_matrix
+
+def write_matrix(matrix: np.ndarray, file_path: str):
+    """
+    Writes a NumPy array to a CSV file.
+
+    Args:
+        matrix (np.ndarray): The 2D NumPy array to write.
+        file_path (str): The path to the output CSV file.
+    """
+    try:
+        # Convert NumPy array back to DataFrame for easy CSV writing
+        df = pd.DataFrame(matrix)
+        # Write to CSV without header and index, and with desired float format
+        df.to_csv(file_path, header=False, index=False, float_format='%.1f')
+    except Exception as e:
+        raise IOError(f"Error writing matrix to CSV file {file_path}: {e}")
